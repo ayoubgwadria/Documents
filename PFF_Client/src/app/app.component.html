@@ -1,0 +1,28 @@
+<!-- App Header/Navigation -->
+<header class="app-header">
+  <div class="header-container">
+    <div class="logo-section">
+      <h1 class="app-title">
+        <span class="app-icon">DocumentPlus</span>
+      </h1>
+    </div>
+        
+    <nav class="nav-section">
+      <!-- Add your navigation links here if needed -->
+      <!-- <a routerLink="/documents" class="nav-link">Documents</a> -->
+      <!-- <a routerLink="/add-document" class="nav-link">Ajouter</a> -->
+    </nav>
+        
+    <div class="user-section">
+      <button *ngIf="isLoggedIn" class="btn btn-logout" (click)="logout()">
+        <span class="btn-icon">🚪</span>
+        Se déconnecter
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content Area -->
+<main class="app-main">
+  <router-outlet></router-outlet>
+</main>

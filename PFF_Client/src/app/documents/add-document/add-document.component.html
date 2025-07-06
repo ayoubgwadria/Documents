@@ -1,0 +1,197 @@
+<div class="upload-container">
+  <div class="upload-card">
+    <div class="upload-header">
+      <h2 class="upload-title">
+        <span class="title-icon">📁</span>
+        Ajouter un Document
+      </h2>
+      <p class="upload-subtitle">
+        Téléversez vos documents pédagogiques en toute simplicité
+      </p>
+    </div>
+
+    <form [formGroup]="uploadForm" (ngSubmit)="onSubmit()" class="upload-form" novalidate>
+      
+      <!-- Title Field -->
+      <div class="form-group">
+        <label class="form-label" for="titre">
+          <span class="label-icon">📝</span>
+          Titre du document
+        </label>
+        <input 
+          id="titre"
+          type="text" 
+          class="form-input"
+          [class.form-input-error]="isFieldInvalid('titre')"
+          formControlName="titre"
+          placeholder="Entrez le titre du document"
+          maxlength="100">
+        <div class="error-message" *ngIf="getFieldError('titre')">
+          {{ getFieldError('titre') }}
+        </div>
+      </div>
+
+      <!-- Type Field -->
+      <div class="form-group">
+        <label class="form-label" for="type">
+          <span class="label-icon">🏷️</span>
+          Type de document
+        </label>
+        <select 
+          id="type"
+          class="form-select"
+          [class.form-input-error]="isFieldInvalid('type')"
+          formControlName="type">
+          <option value="">Sélectionnez un type</option>
+          <option *ngFor="let docType of documentTypes" [value]="docType.value">
+            {{ docType.label }}
+          </option>
+        </select>
+        <div class="error-message" *ngIf="getFieldError('type')">
+          {{ getFieldError('type') }}
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-group">
+        <label class="form-label" for="description">
+          <span class="label-icon">📋</span>
+          Description (optionnel)
+        </label>
+        <textarea 
+          id="description"
+          class="form-textarea"
+          [class.form-input-error]="isFieldInvalid('description')"
+          formControlName="description"
+          placeholder="Ajoutez une description du document..."
+          rows="3"
+          maxlength="500"></textarea>
+        <div class="character-count">
+          {{ uploadForm.get('description')?.value?.length || 0 }}/500 caractères
+        </div>
+        <div class="error-message" *ngIf="getFieldError('description')">
+          {{ getFieldError('description') }}
+        </div>
+      </div>
+
+      <!-- File Upload Area -->
+      <div class="form-group">
+        <label class="form-label">
+          <span class="label-icon">📎</span>
+          Fichier
+        </label>
+        
+        <!-- Drag and Drop Area -->
+        <div 
+          class="file-drop-area"
+          [class.drag-over]="isDragOver"
+          [class.has-file]="selectedFile"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)"
+          (click)="triggerFileInput()">
+          
+          <!-- No File Selected -->
+          <div *ngIf="!selectedFile" class="drop-area-content">
+            <div class="drop-icon">📁</div>
+            <p class="drop-text">
+              <strong>Cliquez pour sélectionner</strong> ou glissez-déposez votre fichier ici
+            </p>
+            <p class="drop-subtext">
+              PDF, Word, Excel, PowerPoint, Texte ou Image (max. 10MB)
+            </p>
+          </div>
+
+          <!-- File Selected -->
+          <div *ngIf="selectedFile" class="selected-file">
+            <div class="file-preview">
+              <!-- Image Preview -->
+              <div *ngIf="previewUrl" class="image-preview">
+                <img [src]="previewUrl" alt="Aperçu" class="preview-image">
+              </div>
+              
+              <!-- File Icon -->
+              <div *ngIf="!previewUrl" class="file-icon">
+                {{ getFileIcon(selectedFile) }}
+              </div>
+            </div>
+            
+            <div class="file-info">
+              <div class="file-name">{{ selectedFile.name }}</div>
+              <div class="file-details">
+                <span class="file-type">{{ getFileTypeName(selectedFile) }}</span>
+                <span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
+              </div>
+            </div>
+            
+            <button 
+              type="button" 
+              class="remove-file-btn"
+              (click)="removeFile(); $event.stopPropagation()"
+              aria-label="Supprimer le fichier">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Hidden File Input -->
+        <input 
+          type="file" 
+          id="file"
+          class="file-input-hidden"
+          (change)="onFileSelected($event)"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,.gif">
+        
+        <div class="error-message" *ngIf="isFieldInvalid('file') && !selectedFile">
+          Veuillez sélectionner un fichier
+        </div>
+      </div>
+
+      <!-- Upload Progress -->
+      <div *ngIf="loading" class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+        </div>
+        <div class="progress-text">
+          Téléversement en cours... {{ uploadProgress.toFixed(0) }}%
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button 
+        type="submit" 
+        class="submit-button"
+        [class.loading]="loading"
+        [disabled]="loading || uploadForm.invalid || !selectedFile">
+        <span *ngIf="!loading" class="button-content">
+          <span class="button-icon">🚀</span>
+          Téléverser le Document
+        </span>
+        <span *ngIf="loading" class="button-content">
+          <span class="spinner"></span>
+          Téléversement...
+        </span>
+      </button>
+    </form>
+
+    <!-- Message Display -->
+    <div class="message-container" *ngIf="message">
+      <div class="message" 
+           [class.success]="message.startsWith('✅')" 
+           [class.error]="message.startsWith('❌')">
+        {{ message }}
+      </div>
+    </div>
+
+    <!-- Upload Tips -->
+    <div class="upload-tips">
+      <h4 class="tips-title">💡 Conseils de téléversement</h4>
+      <ul class="tips-list">
+        <li>Utilisez des noms de fichiers descriptifs</li>
+        <li>Vérifiez que votre fichier ne dépasse pas 10MB</li>
+        <li>Les formats supportés : PDF, Word, Excel, PowerPoint, Texte, Images</li>
+        <li>Ajoutez une description pour faciliter la recherche</li>
+      </ul>
+    </div>
+  </div>
+</div>

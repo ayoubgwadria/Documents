@@ -1,0 +1,164 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-header">
+      <h2 class="auth-title">
+        {{ isLoginMode ? 'Connexion' : 'Inscription' }}
+      </h2>
+      <p class="auth-subtitle">
+        {{ isLoginMode ? 'Connectez-vous à votre compte' : 'Créez votre nouveau compte' }}
+      </p>
+    </div>
+
+    <form [formGroup]="isLoginMode ? loginForm : registerForm"
+          (ngSubmit)="isLoginMode ? onLogin() : onRegister()"
+          class="auth-form"
+          novalidate>
+
+      <!-- Registration Fields -->
+      <div *ngIf="!isLoginMode" class="form-section">
+        <div class="form-group">
+          <label class="form-label" for="nom">Nom complet</label>
+          <input 
+            id="nom"
+            class="form-input"
+            [class.form-input-error]="isFieldInvalid(registerForm, 'nom')"
+            formControlName="nom" 
+            type="text"
+            placeholder="Entrez votre nom complet"
+            autocomplete="name">
+          <div class="error-message" *ngIf="getFieldError(registerForm, 'nom')">
+            {{ getFieldError(registerForm, 'nom') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-email">Adresse email</label>
+          <input 
+            id="register-email"
+            class="form-input"
+            [class.form-input-error]="isFieldInvalid(registerForm, 'email')"
+            formControlName="email" 
+            type="email"
+            placeholder="exemple@email.com"
+            autocomplete="email">
+          <div class="error-message" *ngIf="getFieldError(registerForm, 'email')">
+            {{ getFieldError(registerForm, 'email') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="register-password">Mot de passe</label>
+          <div class="password-input-container">
+            <input 
+              id="register-password"
+              class="form-input password-input"
+              [class.form-input-error]="isFieldInvalid(registerForm, 'motDePasse')"
+              formControlName="motDePasse" 
+              [type]="showRegisterPassword ? 'text' : 'password'"
+              placeholder="Minimum 6 caractères"
+              autocomplete="new-password">
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="togglePasswordVisibility(true)"
+              aria-label="Afficher/masquer le mot de passe">
+              {{ showRegisterPassword ? '👁️' : '👁️‍🗨️' }}
+            </button>
+          </div>
+          <div class="error-message" *ngIf="getFieldError(registerForm, 'motDePasse')">
+            {{ getFieldError(registerForm, 'motDePasse') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="role">Rôle</label>
+          <select 
+            id="role"
+            class="form-select"
+            [class.form-input-error]="isFieldInvalid(registerForm, 'role')"
+            formControlName="role">
+            <option value="STUDENT">Étudiant</option>
+            <option value="PROFESSOR">Professeur</option>
+          </select>
+          <div class="error-message" *ngIf="getFieldError(registerForm, 'role')">
+            {{ getFieldError(registerForm, 'role') }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Fields -->
+      <div *ngIf="isLoginMode" class="form-section">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Adresse email</label>
+          <input 
+            id="login-email"
+            class="form-input"
+            [class.form-input-error]="isFieldInvalid(loginForm, 'email')"
+            formControlName="email" 
+            type="email"
+            placeholder="exemple@email.com"
+            autocomplete="email">
+          <div class="error-message" *ngIf="getFieldError(loginForm, 'email')">
+            {{ getFieldError(loginForm, 'email') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Mot de passe</label>
+          <div class="password-input-container">
+            <input 
+              id="login-password"
+              class="form-input password-input"
+              [class.form-input-error]="isFieldInvalid(loginForm, 'password')"
+              formControlName="password" 
+              [type]="showPassword ? 'text' : 'password'"
+              placeholder="Entrez votre mot de passe"
+              autocomplete="current-password">
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="togglePasswordVisibility(false)"
+              aria-label="Afficher/masquer le mot de passe">
+              {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+            </button>
+          </div>
+          <div class="error-message" *ngIf="getFieldError(loginForm, 'password')">
+            {{ getFieldError(loginForm, 'password') }}
+          </div>
+        </div>
+      </div>
+
+      <button 
+        type="submit" 
+        class="submit-button"
+        [class.loading]="isLoading"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">
+          {{ isLoginMode ? 'Se connecter' : 'S\'inscrire' }}
+        </span>
+        <span *ngIf="isLoading" class="loading-spinner">
+          <span class="spinner"></span>
+          {{ isLoginMode ? 'Connexion...' : 'Inscription...' }}
+        </span>
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <button 
+        type="button"
+        class="toggle-button" 
+        (click)="toggleMode()"
+        [disabled]="isLoading">
+        {{ isLoginMode ? 'Pas encore de compte ? S\'inscrire' : 'Déjà inscrit ? Se connecter' }}
+      </button>
+    </div>
+
+    <div class="message-container" *ngIf="message">
+      <p class="message" 
+         [class.success]="message.startsWith('✅')" 
+         [class.error]="message.startsWith('❌')">
+        {{ message }}
+      </p>
+    </div>
+  </div>
+</div>
