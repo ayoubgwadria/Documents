@@ -361,28 +361,54 @@ export class DocumentsListComponent implements OnInit {
   }
 
   // Document actions
-  viewDocument(id: number): void {
-    this.documentService.downloadDocument(id).subscribe({
-      next: (blob) => {
-        const pdfBlob = new Blob([blob], { type: "application/pdf" })
-        const url = window.URL.createObjectURL(pdfBlob)
-        const newWindow = window.open(url, "_blank")
+viewDocument(id: number, fileExtension: string): void {
+  this.documentService.downloadDocument(id).subscribe({
+    next: (blob: Blob) => {
+      const mimeTypes: { [key: string]: string } = {
+        pdf: 'application/pdf',
+        doc: 'application/msword',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        txt: 'text/plain',
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png'
+      };
+
+      const mimeType = mimeTypes[fileExtension.toLowerCase()] || 'application/octet-stream';
+      const newBlob = new Blob([blob], { type: mimeType });
+
+      const canBeViewed = ['pdf', 'txt', 'jpg', 'jpeg', 'png'].includes(fileExtension.toLowerCase());
+
+      if (canBeViewed) {
+        // Fichiers visualisables directement
+        const url = window.URL.createObjectURL(newBlob);
+        const newWindow = window.open(url, '_blank');
 
         if (newWindow) {
-          newWindow.document.title = "Document Viewer"
+          newWindow.document.title = `Document Viewer - ${fileExtension.toUpperCase()}`;
           newWindow.onload = () => {
-            setTimeout(() => window.URL.revokeObjectURL(url), 1000)
-          }
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+          };
         } else {
-          this.downloadDocument(id, blob)
+          this.downloadDocument(id, newBlob);
         }
-      },
-      error: (error) => {
-        console.error("Error viewing document:", error)
-        alert("Failed to open document. Please try again.")
-      },
-    })
-  }
+      } else {
+        // Fichiers non visualisables — demander confirmation
+        const confirmDownload = window.confirm(`Le fichier .${fileExtension} ne peut pas être affiché directement. Voulez-vous le télécharger ?`);
+        if (confirmDownload) {
+          this.downloadDocument(id, newBlob);
+        }
+      }
+    },
+    error: (error) => {
+      console.error(`Error viewing document:`, error);
+      alert('Échec lors de l’ouverture du document. Veuillez réessayer.');
+    },
+  });
+}
+
+
+
 
   downloadDocument(id: number, blob?: Blob): void {
     if (blob) {

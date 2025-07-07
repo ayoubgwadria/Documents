@@ -29,7 +29,6 @@ public class DocumentService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    // S’assure que le dossier existe
     @PostConstruct
     public void init() {
         try {
@@ -45,13 +44,13 @@ public class DocumentService {
         Path tempFilePath = Paths.get(uploadDir, tempFileName);
         Files.copy(file.getInputStream(), tempFilePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // Sauvegarde du document (id généré automatiquement)
+        // Sauvegarde du document
         Document doc = new Document();
         doc.setTitre(titre);
         doc.setType(type);
         doc.setUploadedBy(professeur);
         doc.setDateUpload(new Date());
-        doc.setFichierNom(tempFileName); // temporaire
+        doc.setFichierNom(tempFileName);
         doc = documentRepository.save(doc);
 
         // Nom de fichier final avec l’ID
@@ -106,6 +105,7 @@ public class DocumentService {
     }
 
     private DocumentResponseDTO mapToDTO(Document document) {
+        String fileExtension = extractFileExtension(document.getFichierNom());
         return new DocumentResponseDTO(
                 document.getId(),
                 document.getTitre(),
@@ -113,7 +113,15 @@ public class DocumentService {
                 document.getDateUpload(),
                 document.getUploadedBy().getNom(),
                 document.getUploadedBy().getEmail(),
-                document.getUploadedBy().getRole()
+                document.getUploadedBy().getRole(),
+                fileExtension // Extract file extension
         );
+    }
+
+    private String extractFileExtension(String fileName) {
+        if (fileName == null || !fileName.contains(".")) {
+            return "";
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
     }
 }

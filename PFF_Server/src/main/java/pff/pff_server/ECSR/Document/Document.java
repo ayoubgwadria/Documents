@@ -1,5 +1,6 @@
 package pff.pff_server.ECSR.Document;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,11 @@ public class Document {
 
     private String fichierNom;
 
+    @Nullable
+    private String fileExtension;
+
     @ManyToOne
     private User uploadedBy ;
+
+
 }

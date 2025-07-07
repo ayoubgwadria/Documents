@@ -18,5 +18,6 @@ public class DocumentResponseDTO {
     private String uploadedByName;
     private String uploadedByEmail;
     private Role role;
+    private String fileExtension;
 }
 

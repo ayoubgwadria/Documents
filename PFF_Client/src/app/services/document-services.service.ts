@@ -11,6 +11,7 @@ export interface DocumentResponse {
   dateUpload: string; // Backend sends Date as ISO string
   uploadedByName: string;
   uploadedByEmail: string;
+  fileExtension:string;
   role: string; // Role enum is serialized as string (e.g., "PROFESSOR")
 }
 
