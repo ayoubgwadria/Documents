@@ -396,7 +396,7 @@ viewDocument(id: number, fileExtension: string): void {
         // Fichiers non visualisables — demander confirmation
         const confirmDownload = window.confirm(`Le fichier .${fileExtension} ne peut pas être affiché directement. Voulez-vous le télécharger ?`);
         if (confirmDownload) {
-          this.downloadDocument(id, newBlob);
+          this.downloadDocument(id, newBlob,fileExtension);
         }
       }
     },
@@ -410,21 +410,24 @@ viewDocument(id: number, fileExtension: string): void {
 
 
 
-  downloadDocument(id: number, blob?: Blob): void {
-    if (blob) {
-      this.createDownloadLink(blob, `document_${id}.pdf`)
-    } else {
-      this.documentService.downloadDocument(id).subscribe({
-        next: (downloadBlob) => {
-          this.createDownloadLink(downloadBlob, `document_${id}.pdf`)
-        },
-        error: (error) => {
-          console.error("Error downloading document:", error)
-          alert("Failed to download document. Please try again.")
-        },
-      })
-    }
+downloadDocument(id: number, blob?: Blob, fileExtension: string = 'pdf'): void {
+  const extension = fileExtension.toLowerCase();
+
+  if (blob) {
+    this.createDownloadLink(blob, `document_${id}.${extension}`);
+  } else {
+    this.documentService.downloadDocument(id).subscribe({
+      next: (downloadBlob) => {
+        this.createDownloadLink(downloadBlob, `document_${id}.${extension}`);
+      },
+      error: (error) => {
+        console.error("Error downloading document:", error);
+        alert("Failed to download document. Please try again.");
+      },
+    });
   }
+}
+
 
   private createDownloadLink(blob: Blob, filename: string): void {
     const url = window.URL.createObjectURL(blob)
